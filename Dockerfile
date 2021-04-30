@@ -5,7 +5,7 @@ ENV GO111MODULE=on \
 	GOOS=linux \
 	GOARCH=amd64
 
-WORKDIR /build
+WORKDIR /stuff
 
 COPY go.mod .
 COPY go.sum .
@@ -15,10 +15,6 @@ COPY . .
 
 RUN go build -o main .
 
-WORKDIR /dist
-
-RUN cp /build/main .
-
 EXPOSE 10000
 
-CMD ["/dist/main"]
+CMD ["/stuff/main"]
