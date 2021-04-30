@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"io/ioutil"
+	"os"
 )
 
 type Company struct {
@@ -184,7 +185,12 @@ func handleRequests() {
 	router.HandleFunc("/company/{id}", updateCompany).Methods("PUT", "OPTIONS")
 	router.HandleFunc("/company/{id}", getCompany)
 	router.HandleFunc("/addOwnership", addBeneficialOwner).Methods("POST")
-	log.Fatal(http.ListenAndServe(":10000", router))
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "10000"
+	}
+	log.Fatal(http.ListenAndServe(":"+port, router))
 }
 
 func main () {
