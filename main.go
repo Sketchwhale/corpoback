@@ -10,6 +10,7 @@ import (
 	"os"
 )
 
+
 type Company struct {
 	Id string
 	Name string
@@ -18,6 +19,49 @@ type Company struct {
 	Country string
 	Email string
 	Phone string
+}
+
+func (c *Company) UnmarshalJSON(data []byte) (err error) {
+	required := struct {
+		Id *string
+		Name *string
+		Address *string
+		City *string
+		Country *string
+	}{}
+	complete := struct {
+		Id string
+		Name string
+		Address string
+		City string
+		Country string
+		Email string
+		Phone string
+	}{}
+	err = json.Unmarshal(data, &required)
+	if err != nil {
+		return err
+	} else if (required.Id == nil || *required.Id == "") {
+		err = fmt.Errorf ("Id cannot be empty or nil")
+	} else if (required.Name == nil || *required.Name == "") {
+		err = fmt.Errorf ("Name cannot be empty or nil")
+	} else if (required.Address == nil || *required.Address == "") {
+		err = fmt.Errorf ("Address cannot be empty or nil")
+	} else if (required.City == nil || *required.City == "") {
+		err = fmt.Errorf ("City cannot be empty or nil")
+	} else if (required.Country == nil || *required.Country == "") {
+		err = fmt.Errorf ("Country cannot be empty or nil")
+	} else {
+		err 		= json.Unmarshal(data, &complete)
+		c.Id 		= complete.Id
+		c.Name 		= complete.Name
+		c.Address 	= complete.Address
+		c.City 		= complete.City
+		c.Country 	= complete.Country
+		c.Email 	= complete.Email
+		c.Phone 	= complete.Phone
+	}
+	return
 }
 
 type CompanyWithOwnership struct {
@@ -29,11 +73,6 @@ type CompanyWithOwnership struct {
 type Ownership struct {
 	OwnerId string
 	OwnedId string
-}
-
-type TotalOverview struct {
-	AllCompanies []Company
-	AllOwnerships []Ownership
 }
 
 var Companies []Company
@@ -49,8 +88,16 @@ func returnAllCompanies(w http.ResponseWriter, r *http.Request) {
 }
 
 func encodeAllCompanies (w http.ResponseWriter) {
-	overview := TotalOverview{AllCompanies: Companies, AllOwnerships: Ownerships}
+
+	overview := struct {
+		AllCompanies []Company
+		AllOwnerships []Ownership
+	}{
+		AllCompanies: Companies,
+		AllOwnerships: Ownerships,
+	}
 	json.NewEncoder(w).Encode(overview)
+
 }
 
 func getCompany(w http.ResponseWriter, r *http.Request) {
@@ -102,9 +149,13 @@ func createCompany(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "application/json")
 	reqBody, _ := ioutil.ReadAll(r.Body)
-	fmt.Println(reqBody)
+	//fmt.Println(reqBody)
 	var company Company
-	json.Unmarshal(reqBody, &company)
+	err := json.Unmarshal(reqBody, &company)
+	if err != nil {
+		json.NewEncoder(w).Encode(err.Error())
+		return
+	}
 	Companies = append(Companies, company)
 	json.NewEncoder(w).Encode(company)
 }
