@@ -27,8 +27,8 @@ type CompanyWithOwnership struct {
 }
 
 type Ownership struct {
-	Owner Company
-	Owned Company
+	OwnerId string
+	OwnedId string
 }
 
 type TotalOverview struct {
@@ -68,11 +68,10 @@ func getCompany(w http.ResponseWriter, r *http.Request) {
 			c = company
 
 			for _, ownership := range Ownerships {
-				if company == ownership.Owner {
+				if company.Id == ownership.OwnerId {
 					subs = append(subs, ownership)
-					//json.NewEncoder(w).Encode(ownership)
 				}
-				if company == ownership.Owned {
+				if company.Id == ownership.OwnedId {
 					owners = append(owners, ownership)
 				}
 			}
@@ -136,28 +135,23 @@ func updateCompany(w http.ResponseWriter, r *http.Request) {
 }
 
 type NewOwnershipJson struct {
-	Owner string
-	Owned string
+	OwnerId string
+	OwnedId string
 }
 
 func addBeneficialOwner (w http.ResponseWriter, r *http.Request) {
 
 	reqBody, _ := ioutil.ReadAll(r.Body)
-	var newOwnershipJson NewOwnershipJson
-	json.Unmarshal(reqBody, &newOwnershipJson)
-	json.NewEncoder(w).Encode(newOwnershipJson)
-
-	var masterCompany Company
-	var slaveCompany Company
+	var newOwnership Ownership
+	json.Unmarshal(reqBody, &newOwnership)
+	json.NewEncoder(w).Encode(newOwnership)
 
 	foundOwner := false
 	foundOwned := false
 	for _, company := range Companies {
-		if company.Id == newOwnershipJson.Owner {
-			masterCompany = company
+		if company.Id == newOwnership.OwnerId {
 			foundOwner = true
-		} else if company.Id == newOwnershipJson.Owned {
-			slaveCompany = company
+		} else if company.Id == newOwnership.OwnedId {
 			foundOwned = true
 		}
 	}
@@ -171,8 +165,6 @@ func addBeneficialOwner (w http.ResponseWriter, r *http.Request) {
 		return;
 	}
 
-
-	var newOwnership = Ownership{Owner: masterCompany, Owned: slaveCompany}
 	Ownerships = append(Ownerships, newOwnership)
 	json.NewEncoder(w).Encode(newOwnership)
 }
@@ -200,8 +192,8 @@ func main () {
 		Company{Id: "Toshiba", Name: "Toshiba", Address:	"Ginza 2-5-6", City: "Tokyo"},
 	}
 	Ownerships =[]Ownership {
-		Ownership{Owner: Companies[1], Owned: Companies[0]},
-		Ownership{Owner: Companies[1], Owned: Companies[2]},
+		Ownership{OwnerId: Companies[1].Id, OwnedId: Companies[0].Id},
+		Ownership{OwnerId: Companies[1].Id, OwnedId: Companies[2].Id},
 	}
 	handleRequests()
 }
