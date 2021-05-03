@@ -1,8 +1,8 @@
-#ABOUT
+# ABOUT
 
 Corpoback lets you view, edit, and create companies, and also add beneficial owners to these.
 
-#HOW
+# HOW
 
 Adding a new company is done with a simple cURL command:
 
