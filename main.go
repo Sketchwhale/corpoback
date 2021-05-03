@@ -174,7 +174,11 @@ func updateCompany(w http.ResponseWriter, r *http.Request) {
 
 	reqBody, _ := ioutil.ReadAll(r.Body)
 	var update Company
-	json.Unmarshal(reqBody, &update)
+	err := json.Unmarshal(reqBody, &update)
+	if err != nil {
+		json.NewEncoder(w).Encode(err.Error())
+		return
+	}
 
 	for index, company := range Companies {
 		if company.Id == id {
@@ -238,9 +242,9 @@ func handleRequests() {
 
 func main () {
 	Companies = []Company {
-		Company{Id: "SonyEurope", Name: "Sony", Address:	"KonigsStrasse", City: "Berlin"},
-		Company{Id: "SonyJapan", Name: "Sony", Address:	"Shinjuku 1-2-4", City: "Tokyo"},
-		Company{Id: "Toshiba", Name: "Toshiba", Address:	"Ginza 2-5-6", City: "Tokyo"},
+		Company{Id: "SonyEurope", Name: "Sony", Address:	"KonigsStrasse", City: "Berlin", Country: "Germany"},
+		Company{Id: "SonyJapan", Name: "Sony", Address:	"Shinjuku 1-2-4", City: "Tokyo", Country: "Japan"},
+		Company{Id: "Toshiba", Name: "Toshiba", Address:	"Ginza 2-5-6", City: "Tokyo", Country: "Japan"},
 	}
 	Ownerships =[]Ownership {
 		Ownership{OwnerId: Companies[1].Id, OwnedId: Companies[0].Id},
